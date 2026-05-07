@@ -46,51 +46,16 @@ export class BudgetController {
 
     static updateBudgetByID= async (req: Request, res: Response) => {
         //console.log('Desde PUT /api/budgets/id')
-        try {
-            //console.log(req.body)
-            const idParam = req.params.id
-            const id = Array.isArray(idParam) ? idParam[0] : idParam
-            if (!id) {
-                return res.status(400).json({error: 'ID inválido'})
-            }
-            const budget = await Budget.findByPk(id)
-            if (!budget) {
-                return res.status(404).json({error: 'Presupuesto no encontrado'})
-            }
-            res.json(budget)
-            // escribir los cambios del body
-            await budget.update(req.body)
-            res.json('Presupuesto actualizado exitosamente')
-        }
         
-        
-        catch (error) {
-            //console.log(error)
-            res.status(500).json({error: 'Error al obtener el presupuesto'})
-        }
-
+        await req.budget.update(req.body)
+        res.json('Presupuesto actualizado exitosamente')
     }
 
     static deleteBudgetByID= async (req: Request, res: Response) => {
         //console.log('Desde DELETE /api/budgets/id')
-        try {
-            //console.log(req.body)
-            const idParam = req.params.id
-            const id = Array.isArray(idParam) ? idParam[0] : idParam
-            if (!id) {
-                return res.status(400).json({error: 'ID inválido'})
-            }
-            const budget = await Budget.findByPk(id)
-            if (!budget) {
-                return res.status(404).json({error: 'Presupuesto no encontrado'})
-            }
-            await budget.destroy()
-            res.json('Presupuesto eliminado exitosamente')
-        }
-        catch (error) {
-            //console.log(error)
-            res.status(500).json({error: 'Error al obtener el presupuesto'})
-        }
+        
+        await req.budget.destroy()
+        res.json('Presupuesto eliminado exitosamente')
     }
 }
 

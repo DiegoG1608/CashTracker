@@ -24,6 +24,7 @@ router.get('/:id',
 
 router.put('/:id', 
     validateBudgetID,
+    validateBudgetExists,
     body('name').notEmpty().withMessage('El nombre del presupuesto no puede estar vacío'), 
     body('amount').notEmpty().withMessage('El monto del presupuesto no puede estar vacío')
     .custom((value) => value > 0).withMessage('El presupuesto debe ser mayor a 0'),
@@ -32,6 +33,7 @@ router.put('/:id',
 
 router.delete('/:id', 
     validateBudgetID,
+    validateBudgetExists,
     BudgetController.deleteBudgetByID)
 
 
