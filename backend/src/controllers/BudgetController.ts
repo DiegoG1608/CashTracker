@@ -42,7 +42,11 @@ export class BudgetController {
         //console.log(req.params.id)
         try {
             //console.log(req.body)
-            const {id} = req.params
+            const idParam = req.params.id
+            const id = Array.isArray(idParam) ? idParam[0] : idParam
+            if (!id) {
+                return res.status(400).json({error: 'ID inválido'})
+            }
             const budget = await Budget.findByPk(id)
             if (!budget) {
                 return res.status(404).json({error: 'Presupuesto no encontrado'})
@@ -60,13 +64,22 @@ export class BudgetController {
         //console.log('Desde PUT /api/budgets/id')
         try {
             //console.log(req.body)
-            const {id} = req.params
+            const idParam = req.params.id
+            const id = Array.isArray(idParam) ? idParam[0] : idParam
+            if (!id) {
+                return res.status(400).json({error: 'ID inválido'})
+            }
             const budget = await Budget.findByPk(id)
             if (!budget) {
                 return res.status(404).json({error: 'Presupuesto no encontrado'})
             }
             res.json(budget)
+            // escribir los cambios del body
+            await budget.update(req.body)
+            res.json('Presupuesto actualizado exitosamente')
         }
+        
+        
         catch (error) {
             //console.log(error)
             res.status(500).json({error: 'Error al obtener el presupuesto'})
