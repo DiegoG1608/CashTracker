@@ -40,24 +40,8 @@ export class BudgetController {
     static getBudgetByID= async (req: Request, res: Response) => {
         //console.log('Desde GET /api/budgets/id')
         //console.log(req.params.id)
-        try {
-            //console.log(req.body)
-            const idParam = req.params.id
-            const id = Array.isArray(idParam) ? idParam[0] : idParam
-            if (!id) {
-                return res.status(400).json({error: 'ID inválido'})
-            }
-            const budget = await Budget.findByPk(id)
-            if (!budget) {
-                return res.status(404).json({error: 'Presupuesto no encontrado'})
-            }
-            res.json(budget)
-        }
-        catch (error) {
-            //console.log(error)
-            res.status(500).json({error: 'Error al obtener el presupuesto'})
-        }
-
+        
+        res.json(req.budget)
     }
 
     static updateBudgetByID= async (req: Request, res: Response) => {
