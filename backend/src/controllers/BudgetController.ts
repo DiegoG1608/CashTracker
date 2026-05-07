@@ -88,6 +88,26 @@ export class BudgetController {
     }
 
     static deleteBudgetByID= async (req: Request, res: Response) => {
-        console.log('Desde DELETE /api/budgets/id')
+        //console.log('Desde DELETE /api/budgets/id')
+        try {
+            //console.log(req.body)
+            const idParam = req.params.id
+            const id = Array.isArray(idParam) ? idParam[0] : idParam
+            if (!id) {
+                return res.status(400).json({error: 'ID inválido'})
+            }
+            const budget = await Budget.findByPk(id)
+            if (!budget) {
+                return res.status(404).json({error: 'Presupuesto no encontrado'})
+            }
+            await budget.destroy()
+            res.json('Presupuesto eliminado exitosamente')
+        }
+        catch (error) {
+            //console.log(error)
+            res.status(500).json({error: 'Error al obtener el presupuesto'})
+        }
     }
 }
+
+//investigar eliminado logico de una base de datos
