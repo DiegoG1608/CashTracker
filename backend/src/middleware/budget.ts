@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express'
-import { param } from 'express-validator'
+import { body, param } from 'express-validator'
 //import { handleInputErrors } from './validation'
 import { validationResult } from 'express-validator'
 import Budget from '../models/Budget'
@@ -15,7 +15,7 @@ declare global {
 export const validateBudgetID = async (req: Request, res: Response, next: NextFunction) => {
 
     //console.log('Desde budget')
-    await param('id')
+    await param('budgetId')
         .isInt().withMessage('ID debe ser un número entero')
         .custom((value) => value > 0)
         .withMessage('ID no valido').run(req)
@@ -31,11 +31,11 @@ export const validateBudgetExists = async (req: Request, res: Response, next: Ne
     try {
             //console.log(req.body)
             const idParam = req.params.id
-            const id = Array.isArray(idParam) ? idParam[0] : idParam
-            if (!id) {
+            const budgetId = Array.isArray(idParam) ? idParam[0] : idParam
+            if (!budgetId) {
                 return res.status(400).json({error: 'ID inválido'})
             }
-            const budget = await Budget.findByPk(id)
+            const budget = await Budget.findByPk(budgetId)
             if (!budget) {
                 return res.status(404).json({error: 'Presupuesto no encontrado'})
             }
@@ -48,4 +48,17 @@ export const validateBudgetExists = async (req: Request, res: Response, next: Ne
             res.status(500).json({error: 'Error al obtener el presupuesto'})
         }
     
+
+}
+
+export const validateBudgetInput = async (req: Request, res: Response, next: NextFunction) => {
+
+    
+        body('name').notEmpty().withMessage('El nombre del presupuesto no puede estar vacío').run(req)
+        body('amount').notEmpty().withMessage('El monto del presupuesto no puede estar vacío')
+        .isNumeric().withMessage('Cantidad no válida')
+        .custom((value) => value > 0).withMessage('El presupuesto debe ser mayor a 0').run(req)
+
+        
+        next()
 }
