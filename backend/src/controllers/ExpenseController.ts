@@ -1,12 +1,22 @@
 import type { Request, Response } from 'express'
+import Expense from '../models/Expense'
 
 export class ExpensesController {
-    static getAll = async (req: Request, res: Response) => {
     
-    }
   
     static create = async (req: Request, res: Response) => {
-     
+        console.log(req.params.budgetId)
+        console.log(req.budget.id)
+        try {
+            const expense = new Expense(req.body)
+            expense.budgetId = req.budget.id
+            await expense.save()
+            res.status(201).json("Gasto creado exitosamente")
+        }
+        catch (error) {
+            res.status(500).json({error: 'Error al crear el gasto'})
+        }
+
     }
   
     static getById = async (req: Request, res: Response) => {
