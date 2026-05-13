@@ -53,24 +53,19 @@ export const validateBudgetExists = async (req: Request, res: Response, next: Ne
         */
 export const validateBudgetExists = async (req, res, next) => {
     try {
-            //console.log(req.body)
-            const { budgetId } = req.params;
-            const budget = await Budget.findByPk(budgetId);
-            // revisar si existe el presupuesto
-            if (!budget) {
-                return res.status(404).json({ message: 'Presupuesto no encontrado' });
-            }
-            res.json(budget);
-            req.budget = budget;
+        const { budgetId } = req.params;
+        const budget = await Budget.findByPk(budgetId);
 
-            next()
+        if (!budget) {
+            return res.status(404).json({ message: 'Presupuesto no encontrado' });
         }
-        catch (error) {
-            //console.log(error)
-            res.status(500).json({error: 'Error al obtener el presupuesto'})
-        }
-    
 
+        
+        req.budget = budget
+        next();
+    } catch (error) {
+        return res.status(500).json({ error: 'Error al obtener el presupuesto' });
+    }
 }
 
 export const validateBudgetInput = async (req: Request, res: Response, next: NextFunction) => {
