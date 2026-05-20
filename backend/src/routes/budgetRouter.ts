@@ -4,7 +4,7 @@ import { BudgetController } from "../controllers/BudgetController"
 import { handleInputErrors } from "../middleware/validation"
 import { validateBudgetExists, validateBudgetID, validateBudgetInput } from "../middleware/budget"
 import { ExpensesController } from "../controllers/ExpenseController"
-import { validateExpenseID, validateExpenseInput } from "../middleware/expense"
+import { validateExpenseExists, validateExpenseID, validateExpenseInput } from "../middleware/expense"
 
 const router = Router()
 
@@ -12,6 +12,7 @@ router.param('budgetId', validateBudgetID)
 router.param('budgetId', validateBudgetExists)
 
 router.param('expenseId', validateExpenseID)
+router.param('expenseId', validateExpenseExists)
 
 router.get('/', BudgetController.getAll)
 
@@ -44,6 +45,8 @@ router.get('/:budgetId/expenses/:expenseId',
     ExpensesController.getById)//Obtener un gasto específico de un presupuesto
 
 router.put('/:budgetId/expenses/:expenseId',
+    validateExpenseInput,
+    handleInputErrors,
     ExpensesController.updateById)//Actualizar un gasto específico de un presupuesto
 
 router.delete('/:budgetId/expenses/:expenseId',
