@@ -1,8 +1,10 @@
 import type {Request, Response} from 'express'
 import User from '../models/User'
-import { hashPassword } from '../utils/auth'
+import { checkPassword, hashPassword } from '../utils/auth'
 import { generateToken } from '../utils/token'
 import { AuthEmail } from '../emails/AuthEmail'
+import { generateJWT } from '../utils/jwt'
+import jwt from 'jsonwebtoken'
 
 
 export class AuthController {
@@ -49,9 +51,111 @@ export class AuthController {
         await user.save()
         res.json('Cuenta confirmada exitosamente')
     }
+
+    static login = async(req: Request, res: Response) => {
+        const {email, password} = req.body
+
+        const user = await User.findOne({where: {email}})
+        if (!user) {
+            return res.status(409).json({error: 'Usuario no encontrado'})
+        }
+
+
+        if (!user.confirmed) {
+            return res.status(403).json({error: 'La cuenta no ha sido confirmada'})
+        }
+
+        const isPasswordCorrect = await checkPassword( password, user.password)
+
+        
+        if (!isPasswordCorrect) {
+            return res.status(401).json({error: 'Password incorrecto'})
+        }
+
+        const token = generateJWT(user.id)
+        res.json(token)
+
+        //res.json(user)
+        //console.log(isPasswordCorrect);
+        
+    }
+
+    static forgotPassword = async(req: Request, res: Response) => {
+        //res.json('Olvidé mi contraseña')
+
+        const {email} = req.body
+
+        const user = await User.findOne({where: {email}})
+        if (!user) {
+            return res.status(404).json({error: 'Usuario no encontrado'})
+        }
+
+        user.token = generateToken()
+        await user.save()
+
+        await AuthEmail.sendPasswordResetToken({
+            name: user.name,
+            email: user.email,
+            token: user.token
+        })
+
+        res.json('Revisa tu email para reestablecer tu contraseña')
+    }
+
+
+    static validateToken = async(req: Request, res: Response) => {
+        const {token} = req.body
+        const tokenExists = await User.findOne({where: {token}})
+        if (!tokenExists) {
+            return res.status(404).json({error: 'Token no válido'})
+        }
+
+        res.json('Token válido')
+    }
+
+    static resetPasswordWithToken = async(req: Request, res: Response) => {
+        const {token} = req.params
+        const {password} = req.body
+
+        const user = await User.findOne({where: {token}})
+        if (!user) {
+            return res.status(404).json({error: 'Token no válido'})
+        }
+
+        user.password = await hashPassword(password)
+        user.token = null
+        await user.save()
+
+        res.json('Contraseña restablecida exitosamente')
+    }
+
+
+    static user = async(req: Request, res: Response) => {
+        //res.json('Información del usuario autenticado')
+
+        const bearer = req.headers.authorization
+        if (!bearer) {
+            return res.status(401).json({error: 'No autorizado'})
+        }
+        const [, token]= bearer.split(' ')
+
+        if (!token) {
+            return res.status(401).json({error: 'Token no valido'})
+        }
+
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET || '')
+            res.json(decoded)
+        }
+            catch (error) {
+                
+                return res.status(500).json({error: 'Token no valido'})
+            }
+        
+        res.json({token})
+    }
+
 }
 
-
-    
 
 export default AuthController
