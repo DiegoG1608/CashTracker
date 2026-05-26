@@ -133,28 +133,42 @@ export class AuthController {
     static user = async(req: Request, res: Response) => {
         //res.json('Información del usuario autenticado')
 
-        const bearer = req.headers.authorization
-        if (!bearer) {
-            return res.status(401).json({error: 'No autorizado'})
-        }
-        const [, token]= bearer.split(' ')
+        res.json(req.user)
 
-        if (!token) {
-            return res.status(401).json({error: 'Token no valido'})
+    }
+    static updateCurrentUserPassword = async(req: Request, res: Response) => {
+        const {current_password, password} = req.body
+        const {id} = req.user
+
+        const user = await User.findByPk(id)
+
+        const isPasswordCorrect = await checkPassword(current_password, user.password)
+        if (!isPasswordCorrect) {
+            return res.status(401).json({error: 'La contraseña actual es incorrecta'})
         }
 
-        try {
-            const decoded = jwt.verify(token, process.env.JWT_SECRET || '')
-            res.json(decoded)
-        }
-            catch (error) {
-                
-                return res.status(500).json({error: 'Token no valido'})
-            }
-        
-        res.json({token})
+        user.password = await hashPassword(password)
+        await user.save()
+
+        //res.json('Actualizar contraseña del usuario autenticado')
+        res.json('El password se modifico exitosamente')
     }
 
+
+    static checkPassword = async(req: Request, res: Response) => {
+        const {password} = req.body
+        const {id} = req.user
+
+        const user = await User.findByPk(id)
+
+        const isPasswordCorrect = await checkPassword(password, user.password)
+        if (!isPasswordCorrect) {
+            return res.status(401).json({error: 'La contraseña actual es incorrecta'})
+        }
+
+        //res.json('Actualizar contraseña del usuario autenticado')
+        res.json('El password es correcto')
+    }
 }
 
 

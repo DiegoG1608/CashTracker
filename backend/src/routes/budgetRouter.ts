@@ -2,17 +2,23 @@ import { Router } from "express"
 import { body, param } from 'express-validator'
 import { BudgetController } from "../controllers/BudgetController"
 import { handleInputErrors } from "../middleware/validation"
-import { validateBudgetExists, validateBudgetID, validateBudgetInput } from "../middleware/budget"
+import { hasAccess, validateBudgetExists, validateBudgetID, validateBudgetInput } from "../middleware/budget"
 import { ExpensesController } from "../controllers/ExpenseController"
 import { validateExpenseExists, validateExpenseID, validateExpenseInput } from "../middleware/expense"
+import { authenticate } from "../middleware/auth"
 
 const router = Router()
 
+router.use(authenticate) // Middleware de autenticación para todas las rutas de presupuestos
+
 router.param('budgetId', validateBudgetID)
 router.param('budgetId', validateBudgetExists)
+router.param('budgetId', hasAccess)
 
 router.param('expenseId', validateExpenseID)
 router.param('expenseId', validateExpenseExists)
+
+
 
 router.get('/', BudgetController.getAll)
 

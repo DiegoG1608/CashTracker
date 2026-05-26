@@ -12,7 +12,7 @@ export class BudgetController {
                     ],
                     limit: 2,
                     where: {
-                        name: "Tacos"
+                        userId: req.user.id
                     }
 
             })
@@ -28,7 +28,7 @@ export class BudgetController {
         try {
             //console.log(req.body)
             const budget = new Budget(req.body)
-
+            budget.userId = req.user.id
             await budget.save()
             res.status(201).json('Presupuesto creado exitosamente') 
         }
@@ -45,7 +45,10 @@ export class BudgetController {
             include: [Expense]
         })
         //res.json(req.budget)
+
+        
         res.json(budget)
+        
     }
 
     static updateBudgetByID= async (req: Request, res: Response) => {
