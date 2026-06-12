@@ -10,7 +10,7 @@ export class BudgetController {
                     order: [
                         ['createdAt', 'DESC']
                     ],
-                    limit: 2,
+                    
                     where: {
                         userId: req.user.id
                     }
