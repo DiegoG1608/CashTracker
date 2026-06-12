@@ -8,7 +8,9 @@ jest.mock('../../models/Budget', () => ({
     __esModule: true,
     default: {
         findAll: jest.fn(),
+        create: jest.fn(),
     }
+    
 }))
 
 type FindAllOptions = {
@@ -171,5 +173,76 @@ describe('BudgetController.getAll', () => {
         expect(res.statusCode).toBe(500)
         expect(res._getJSONData()).toStrictEqual({ error: 'Error al obtener los presupuestos' })
 
+    })
+})
+
+
+describe('BudgetController.create', () => {
+    it('should create a new budget successfully and respond with statusCode 201', async () => {
+
+        const mockBudget = {
+            save: jest.fn<()=>Promise<boolean>>().mockResolvedValue(true) // Simula el método save del modelo Budget
+            //save: jest.fn().mockResolvedValue(true)
+        };
+        (Budget.create as jest.MockedFunction<any>).mockResolvedValue(mockBudget) // Simula el método create del modelo Budget para que devuelva el mockBudget
+        //(Budget.create as jest.Mock).mockResolvedValue(mockBudget)
+        const req=createRequest({
+            method: 'POST',
+            url: '/api/budgets',
+            user: {
+                id: 1
+            },
+            body: {
+                name: 'Nuevo Presupuesto',
+                amount: 1000
+            }
+        })
+
+        const res=createResponse();
+        await BudgetController.create(req, res)
+
+        const data = res._getJSONData()
+        console.log(data)
+
+        expect(res.statusCode).toBe(201)
+        expect(data).toBe('Presupuesto creado exitosamente') // Verifica que el mensaje de éxito sea el esperado (importante respetar el mensaje exacto, incluyendo mayúsculas y acentos)
+        expect(Budget.create).toHaveBeenCalledWith(req.body) // Verifica que el método create del modelo Budget haya sido llamado con los datos del cuerpo de la solicitud
+        expect(mockBudget.save).toHaveBeenCalled() // Verifica que el método save del mockBudget haya sido llamado
+        expect(mockBudget.save).toHaveBeenCalledTimes(1) // Verifica que el método save del mockBudget haya sido llamado exactamente una vez
+    })
+
+
+    it('should handle budget creation error', async () => {
+
+        const mockBudget = {
+            save: jest.fn()
+        };
+        (Budget.create as jest.MockedFunction<any>).mockRejectedValue(new Error) // Simula un error en la base de datos al intentar crear un presupuesto
+        const req=createRequest({
+            method: 'POST',
+            url: '/api/budgets',
+            user: {
+                id: 1
+            },
+            body: {
+                name: 'Nuevo Presupuesto',
+                amount: 1000
+            }
+        })
+
+        const res=createResponse();
+        await BudgetController.create(req, res)
+
+        const data = res._getJSONData()
+        console.log(data)
+
+        expect(res.statusCode).toBe(500)
+        expect(data).toStrictEqual({ error: 'Error al crear el presupuesto' }) // Verifica que el mensaje de error sea el esperado (importante respetar el mensaje exacto, incluyendo mayúsculas y acentos)
+        expect(Budget.create).toHaveBeenCalledWith(req.body) // Verifica que el método create del modelo Budget haya sido llamado con los datos del cuerpo de la solicitud
+
+
+        
+        expect(Budget.create).toHaveBeenCalledWith(req.body) // Verifica que el método create del modelo Budget haya sido llamado con los datos del cuerpo de la solicitud
+        expect(mockBudget.save).not.toHaveBeenCalled() // Verifica que el método save del mockBudget haya sido llamado
     })
 })

@@ -27,7 +27,7 @@ export class BudgetController {
         console.log(req.body)
         try {
             //console.log(req.body)
-            const budget = new Budget(req.body)
+            const budget = await Budget.create(req.body)
             budget.userId = req.user.id
             await budget.save()
             res.status(201).json('Presupuesto creado exitosamente') 
