@@ -3,12 +3,14 @@ import {budgets} from '../mocks/budgets'
 import { describe, it, expect, jest, beforeEach, beforeAll, afterEach, afterAll } from '@jest/globals'
 import { BudgetController } from '../../controllers/BudgetController'
 import Budget from '../../models/Budget'
+import Expense from '../../models/Expense'
 
 jest.mock('../../models/Budget', () => ({
     __esModule: true,
     default: {
         findAll: jest.fn(),
         create: jest.fn(),
+        findByPk: jest.fn(),
     }
     
 }))
@@ -244,5 +246,126 @@ describe('BudgetController.create', () => {
         
         expect(Budget.create).toHaveBeenCalledWith(req.body) // Verifica que el método create del modelo Budget haya sido llamado con los datos del cuerpo de la solicitud
         expect(mockBudget.save).not.toHaveBeenCalled() // Verifica que el método save del mockBudget haya sido llamado
+    })
+})
+
+
+describe('BudgetController.getBudgetByID', () => {
+
+    //una vez antes de cada test, se ejecuta esta función
+    beforeEach(() => {
+        
+        //const mockedFindAll = jest.mocked(Budget.findAll)
+
+        
+        (Budget.findByPk as jest.Mock).mockImplementation(id =>{
+            const budget = budgets.filter(b => b.id === id)[0]
+            return Promise.resolve(budget)
+        })
+    })
+
+    it('should return a budget with ID 1 and 3 expenses', async () => {
+        const req=createRequest({
+            method: 'GET',
+            url: '/api/budgets/:budgetId',
+            budget: {
+                id: 1
+            }
+        })
+
+        const res=createResponse();
+        await BudgetController.getBudgetByID(req, res)
+
+        const data = res._getJSONData()
+        expect(res.statusCode).toBe(200)
+        expect(data.expenses).toHaveLength(3)
+        expect(Budget.findByPk).toHaveBeenCalledTimes(1)
+        expect(Budget.findByPk).toHaveBeenCalledWith(req.budget.id, {include: [Expense]})
+        
+    })
+
+    it('should return a budget with ID 2 and 2 expenses', async () => {
+        const req=createRequest({
+            method: 'GET',
+            url: '/api/budgets/:id',
+            budget: {
+                id: 2
+            }
+        })
+
+        const res=createResponse();
+        await BudgetController.getBudgetByID(req, res)
+
+        const data = res._getJSONData()
+        expect(res.statusCode).toBe(200)
+        expect(data.expenses).toHaveLength(2)
+        
+    })
+
+
+    it('should return a budget with ID 3 and 0 expenses', async () => {
+        const req=createRequest({
+            method: 'GET',
+            url: '/api/budgets/:id',
+            budget: {
+                id: 3
+            }
+        })
+
+        const res=createResponse();
+        await BudgetController.getBudgetByID(req, res)
+
+        const data = res._getJSONData()
+        expect(res.statusCode).toBe(200)
+        expect(data.expenses).toHaveLength(0)
+        
+    })
+})
+
+
+describe('BudgetController.updateBudgetByID', () => {
+    it('should update the budget with ID 1 successfully', async () => {
+        const budgetMock = {
+            update: jest.fn<()=>Promise<boolean>>().mockResolvedValue(true) // Simula el método save del modelo Budget
+        };
+        const req=createRequest({
+            method: 'PUT',
+            url: '/api/budgets/:budgetId',
+            budget: budgetMock,
+            body: { name: 'Presupuesto Actualizado', amount: 5000 }
+        })
+
+        const res=createResponse();
+        await BudgetController.updateBudgetByID(req, res)
+
+        const data = res._getJSONData()
+        expect(res.statusCode).toBe(200)
+        expect(data).toBe('Presupuesto actualizado exitosamente') // Verifica que el mensaje de éxito sea el esperado (importante respetar el mensaje exacto, incluyendo mayúsculas y acentos)
+        expect(budgetMock.update).toHaveBeenCalled() // Verifica que el método update del mockBudget haya sido llamado
+        expect(budgetMock.update).toHaveBeenCalledTimes(1) // Verifica que el método update del mockBudget haya sido llamado exactamente una vez
+        expect(budgetMock.update).toHaveBeenCalledWith(req.body) // Verifica que el método update del mockBudget haya sido llamado con los datos del cuerpo de la solicitud
+    })
+})
+
+describe('BudgetController.deleteBudgetByID', () => {
+    it('should delete the budget with ID 1 successfully', async () => {
+        const budgetMock = {
+            destroy: jest.fn<()=>Promise<boolean>>().mockResolvedValue(true) // Simula el método save del modelo Budget
+        };
+        const req=createRequest({
+            method: 'DELETE',
+            url: '/api/budgets/:budgetId',
+            budget: budgetMock,
+            
+        })
+
+        const res=createResponse();
+        await BudgetController.deleteBudgetByID(req, res)
+
+        const data = res._getJSONData()
+        expect(res.statusCode).toBe(200)
+        expect(data).toBe('Presupuesto eliminado exitosamente') // Verifica que el mensaje de éxito sea el esperado (importante respetar el mensaje exacto, incluyendo mayúsculas y acentos)
+        expect(budgetMock.destroy).toHaveBeenCalled() // Verifica que el método destroy del mockBudget haya sido llamado
+        expect(budgetMock.destroy).toHaveBeenCalledTimes(1) // Verifica que el método destroy del mockBudget haya sido llamado exactamente una vez
     })
 })
