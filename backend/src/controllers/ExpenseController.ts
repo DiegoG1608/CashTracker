@@ -8,7 +8,7 @@ export class ExpensesController {
         console.log(req.params.budgetId)
         console.log(req.budget.id)
         try {
-            const expense = new Expense(req.body)
+            const expense = await Expense.create(req.body)
             expense.budgetId = req.budget.id
             await expense.save()
             res.status(201).json("Gasto creado exitosamente")

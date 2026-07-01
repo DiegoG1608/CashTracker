@@ -1,11 +1,11 @@
 import {createRequest, createResponse}from 'node-mocks-http'
-import {budgets} from '../mocks/budgets'
+import {budgets} from '../../mocks/budgets'
 import { describe, it, expect, jest, beforeEach, beforeAll, afterEach, afterAll } from '@jest/globals'
-import { BudgetController } from '../../controllers/BudgetController'
-import Budget from '../../models/Budget'
-import Expense from '../../models/Expense'
+import { BudgetController } from '../../../controllers/BudgetController'
+import Budget from '../../../models/Budget'
+import Expense from '../../../models/Expense'
 
-jest.mock('../../models/Budget', () => ({
+jest.mock('../../../models/Budget', () => ({
     __esModule: true,
     default: {
         findAll: jest.fn(),
@@ -334,6 +334,7 @@ describe('BudgetController.updateBudgetByID', () => {
             budget: budgetMock,
             body: { name: 'Presupuesto Actualizado', amount: 5000 }
         })
+
 
         const res=createResponse();
         await BudgetController.updateBudgetByID(req, res)
