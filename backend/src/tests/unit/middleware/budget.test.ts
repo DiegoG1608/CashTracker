@@ -46,7 +46,7 @@ describe('Budget Middleware - validateBudgetExists', () => {
         expect(req.budget).toEqual(budgets[0])
     })
 
-    it('should handle errors during budget retrieval', async () => {
+    it('should handle internal server error', async () => {
         (Budget.findByPk as jest.Mock).mockRejectedValue(new Error)
 
 
@@ -72,8 +72,8 @@ describe('Budget Middleware - hasAccess', () => {
         const res = createResponse()
         const next = jest.fn()
 
-        console.log('req.user.id:', req.user.id)
-        console.log('req.budget.userId:', req.budget.userId)
+        //console.log('req.user.id:', req.user.id)
+        //console.log('req.budget.userId:', req.budget.userId)
 
         hasAccess(req, res, next)
 

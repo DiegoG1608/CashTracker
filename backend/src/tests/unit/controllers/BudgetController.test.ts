@@ -82,7 +82,7 @@ describe('BudgetController.getAll', () => {
         await BudgetController.getAll(req, res)
 
         const data = res._getJSONData()
-        console.log(data)
+        //console.log(data)
         expect(data).toHaveLength(2)
         expect(res.statusCode).toBe(200)
         expect(res.status).not.toBe(404)
@@ -116,7 +116,7 @@ describe('BudgetController.getAll', () => {
         await BudgetController.getAll(req, res)
 
         const data = res._getJSONData()
-        console.log(data)
+        //console.log(data)
         expect(data).toHaveLength(1)
         expect(res.statusCode).toBe(200)
         expect(res.status).not.toBe(404)
@@ -149,7 +149,7 @@ describe('BudgetController.getAll', () => {
         await BudgetController.getAll(req, res)
 
         const data = res._getJSONData()
-        console.log(data)
+        //console.log(data)
         expect(data).toHaveLength(0)
         expect(res.statusCode).toBe(200)
         expect(res.status).not.toBe(404)
@@ -204,7 +204,7 @@ describe('BudgetController.create', () => {
         await BudgetController.create(req, res)
 
         const data = res._getJSONData()
-        console.log(data)
+        //console.log(data)
 
         expect(res.statusCode).toBe(201)
         expect(data).toBe('Presupuesto creado exitosamente') // Verifica que el mensaje de éxito sea el esperado (importante respetar el mensaje exacto, incluyendo mayúsculas y acentos)
@@ -236,7 +236,7 @@ describe('BudgetController.create', () => {
         await BudgetController.create(req, res)
 
         const data = res._getJSONData()
-        console.log(data)
+        //console.log(data)
 
         expect(res.statusCode).toBe(500)
         expect(data).toStrictEqual({ error: 'Error al crear el presupuesto' }) // Verifica que el mensaje de error sea el esperado (importante respetar el mensaje exacto, incluyendo mayúsculas y acentos)
